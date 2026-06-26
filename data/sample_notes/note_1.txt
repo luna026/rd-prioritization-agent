@@ -1,1 +1,6 @@
+Stability concerns — June 3, 2026
 
+After EXP008 and EXP011, the team noted that pulsed field conditions consistently push
+alignment above 0.70 but cause the system to become unstable (stability < 0.50).
+This is a recurring problem at higher field intensities. We may need to explore
+combining pulsed fields with lower particle density to recover stability.
