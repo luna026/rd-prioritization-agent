@@ -1,24 +1,15 @@
-"""
-context_agent.py
-Second agent in the pipeline.
-Loads all project data and builds a rich context summary using google-genai.
-"""
 import os
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from src.utils.llm_client import generate
 from src.utils.loader import load_experiments, load_constraints, load_notes, summarize_experiments
 from src.prompts.prompts import CONTEXT_PROMPT_TEMPLATE
 
 load_dotenv()
-client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
+
+CONTEXT_SYSTEM = "You are an expert R&D planning assistant. Analyze the provided project context carefully and thoroughly."
 
 
 def run_context_agent(goal_rephrased: str) -> dict:
-    """
-    Load all project data and return a structured context object
-    with history summary, notes, constraints, and LLM-generated analysis.
-    """
     df = load_experiments()
     constraints = load_constraints()
     notes = load_notes()
@@ -38,18 +29,12 @@ def run_context_agent(goal_rephrased: str) -> dict:
         target_alignment=rules["target_alignment_score"],
     )
 
-    response = client.models.generate_content(
-        model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction="You are an expert R&D planning assistant. Analyze the provided project context carefully and thoroughly.",
-        ),
-    )
+    analysis = generate(CONTEXT_SYSTEM, prompt)
 
     return {
         "raw_data": df,
         "constraints": constraints,
         "notes": notes,
         "history_summary": history_summary,
-        "llm_analysis": response.text,
+        "llm_analysis": analysis,
     }
