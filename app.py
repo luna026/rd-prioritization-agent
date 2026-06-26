@@ -30,9 +30,9 @@ DEFAULT_GOAL = "recommend the next best experiments to improve particle alignmen
 
 def run_pipeline(user_goal: str):
     console.print(Panel.fit(
-        "[bold teal]R&D Experiment Prioritization Agent[/bold teal]\n"
+        "[bold cyan]R&D Experiment Prioritization Agent[/bold cyan]\n"
         "[dim]Agents for Business — Kaggle Capstone[/dim]",
-        border_style="teal"
+        border_style="cyan"
     ))
 
     # ── Agent 1: Intake ────────────────────────────────────────────────
