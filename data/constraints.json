@@ -1,1 +1,39 @@
-
+{
+  "project_name": "R&D Experiment Prioritization Agent",
+  "team_type": "solo",
+  "track": "Agents for Business",
+  "business_objective": "Recommend the next best experiments while balancing alignment improvement, stability, cost, and runtime.",
+  "scientific_objective": "Improve particle alignment without crossing the instability threshold.",
+  "operational_constraints": {
+    "max_budget_eur_per_experiment": 200,
+    "max_time_hours_per_experiment": 8,
+    "max_parallel_experiments": 2,
+    "preferred_temperature_range_c": [22, 25],
+    "preferred_density_range": [0.30, 0.35]
+  },
+  "decision_rules": {
+    "minimum_stability_score": 0.50,
+    "target_alignment_score": 0.70,
+    "penalize_failed_conditions": true,
+    "favor_novel_but_feasible_experiments": true,
+    "prefer_experiments_similar_to_successful_runs": true
+  },
+  "allowed_actions": [
+    "summarize_experiment_history",
+    "retrieve_constraints",
+    "rank_next_experiments",
+    "generate_decision_memo"
+  ],
+  "security_rules": {
+    "reject_unrelated_requests": true,
+    "do_not_expose_env_vars": true,
+    "restrict_tool_access_to_local_project_files": true,
+    "refuse_requests_for_secrets_or_credentials": true
+  },
+  "output_requirements": {
+    "top_k_recommendations": 3,
+    "include_reasoning_summary": true,
+    "include_risk_notes": true,
+    "include_manager_friendly_memo": true
+  }
+}
