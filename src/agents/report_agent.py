@@ -1,17 +1,18 @@
 """
 report_agent.py
 Fourth and final agent in the pipeline.
-Generates a professional, manager-friendly decision memo from all prior context.
+Generates a professional decision memo using Gemini.
 """
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from src.security.guardrails import sanitize_output
 from src.prompts.prompts import MEMO_PROMPT_TEMPLATE
 
 load_dotenv()
-genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
 
 
 def run_report_agent(context: dict, prioritization: dict) -> str:
@@ -23,7 +24,6 @@ def run_report_agent(context: dict, prioritization: dict) -> str:
     explanation = prioritization["ranking_explanation"]
     constraints = context["constraints"]
 
-    # Build full context for memo generation
     ranked_summary = ""
     for i, row in ranked.iterrows():
         ranked_summary += (
@@ -46,20 +46,20 @@ Top {len(ranked)} ranked experiments:
 {MEMO_PROMPT_TEMPLATE}
 """
 
-    model = genai.GenerativeModel(
-        model_name=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
-        system_instruction=(
-            "You are an expert scientific report writer. "
-            "Write a clear, confident, professional memo for a research manager. "
-            "Be specific about which experiments to run and why. "
-            "Keep it under 250 words. Never make up data."
+    response = client.models.generate_content(
+        model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+        contents=full_prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=(
+                "You are an expert scientific report writer. "
+                "Write a clear, confident, professional memo for a research manager. "
+                "Be specific. Keep it under 250 words. Never make up data."
+            ),
         ),
     )
 
-    response = model.generate_content(full_prompt)
     memo = sanitize_output(response.text)
 
-    # Save output
     Path("output").mkdir(exist_ok=True)
     with open("output/sample_report.md", "w") as f:
         f.write("# R&D Experiment Prioritization — Decision Memo\n\n")
