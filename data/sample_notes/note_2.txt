@@ -1,1 +1,6 @@
+Cost observations — June 10, 2026
 
+Budget-friendly experiments (EXP009) show that medium field at 22C and low density
+gives a stable and cheap baseline, but alignment stays near 0.53, well below the 0.70
+target. The team agreed that chasing cost efficiency too aggressively delays the
+primary goal. Maximum budget per run has been kept at 200 EUR.
