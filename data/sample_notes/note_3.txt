@@ -1,1 +1,7 @@
+Promising directions — June 18, 2026
 
+Gradient and adaptive field conditions (EXP007, EXP010, EXP012) have shown the best
+balance between alignment and stability so far. EXP012 achieved both a good alignment
+score (0.67) and good stability (0.64) but was expensive (220 EUR) and slow (9 hours).
+Next experiments should explore whether adaptive field at slightly reduced density can
+keep the same trade-off at lower cost and time.
