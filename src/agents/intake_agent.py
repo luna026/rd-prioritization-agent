@@ -1,17 +1,10 @@
-"""
-intake_agent.py
-First agent in the pipeline.
-Validates and extracts structured intent from the user's goal using google-genai + Gemini.
-"""
 import os
 import json
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from src.utils.llm_client import generate
 from src.security.guardrails import validate_user_input
 
 load_dotenv()
-client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
 
 INTAKE_SYSTEM_PROMPT = """
 You are the intake agent for an R&D experiment planning system.
@@ -28,11 +21,6 @@ Only respond with valid JSON. No extra text.
 
 
 def run_intake_agent(user_goal: str) -> dict:
-    """
-    Validate user input and extract structured intent.
-    Returns a dict with intent, rephrased goal, and validation result.
-    """
-    # Security check before calling LLM
     is_valid, reason = validate_user_input(user_goal)
     if not is_valid:
         return {
@@ -42,23 +30,15 @@ def run_intake_agent(user_goal: str) -> dict:
             "rejection_reason": reason,
         }
 
-    response = client.models.generate_content(
-        model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
-        contents=f'User goal: "{user_goal}"\n\nRespond with valid JSON only.',
-        config=types.GenerateContentConfig(
-            system_instruction=INTAKE_SYSTEM_PROMPT,
-        ),
-    )
+    raw = generate(INTAKE_SYSTEM_PROMPT, f'User goal: "{user_goal}"\n\nRespond with valid JSON only.')
 
     try:
-        raw = response.text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        result = json.loads(raw)
+        cleaned = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        return json.loads(cleaned)
     except Exception:
-        result = {
+        return {
             "valid": True,
             "intent": "prioritize_experiments",
             "goal_rephrased": user_goal,
             "rejection_reason": None,
         }
-
-    return result
