@@ -1,22 +1,23 @@
 """
 context_agent.py
 Second agent in the pipeline.
-Loads all project data and builds a rich, structured context summary for downstream agents.
+Loads all project data and builds a rich context summary using google-genai.
 """
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from src.utils.loader import load_experiments, load_constraints, load_notes, summarize_experiments
 from src.prompts.prompts import CONTEXT_PROMPT_TEMPLATE
 
 load_dotenv()
-genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
 
 
 def run_context_agent(goal_rephrased: str) -> dict:
     """
     Load all project data and return a structured context object
-    containing history summary, notes, constraints, and an LLM-generated analysis.
+    with history summary, notes, constraints, and LLM-generated analysis.
     """
     df = load_experiments()
     constraints = load_constraints()
@@ -27,7 +28,6 @@ def run_context_agent(goal_rephrased: str) -> dict:
     ops = constraints["operational_constraints"]
     rules = constraints["decision_rules"]
 
-    # Build the prompt with real data
     prompt = CONTEXT_PROMPT_TEMPLATE.format(
         objective=goal_rephrased,
         history_summary=history_summary,
@@ -38,12 +38,13 @@ def run_context_agent(goal_rephrased: str) -> dict:
         target_alignment=rules["target_alignment_score"],
     )
 
-    model = genai.GenerativeModel(
-        model_name=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
-        system_instruction="You are an expert R&D planning assistant. Analyze the provided project context carefully and thoroughly.",
+    response = client.models.generate_content(
+        model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction="You are an expert R&D planning assistant. Analyze the provided project context carefully and thoroughly.",
+        ),
     )
-
-    response = model.generate_content(prompt)
 
     return {
         "raw_data": df,
