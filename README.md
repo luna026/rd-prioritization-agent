@@ -1,6 +1,7 @@
 # R&D Experiment Prioritization Agent
+**Kaggle Capstone — Agents for Business Track**
 
-An AI agent system for R&D teams that analyzes previous experiment outcomes, current constraints, and project goals to recommend the next best experiments and generate a short decision-ready memo.
+An enterprise-grade multi-agent system that analyzes R&D experiment history and recommends the next best experiments to run — with reasoning, trade-off analysis, and a structured decision memo.
 
 ## Problem
 
@@ -63,14 +64,33 @@ This project uses a small multi-agent design:
 - **Report Agent**  
   Produces a human-readable recommendation memo.
 
-## Course concepts demonstrated
+the process flow: User Goal → [Intake Agent] → [Context Agent] → [Prioritization Agent] → [Report Agent] → Decision Memo
 
-This project is designed to demonstrate at least three course concepts required by the capstone:
 
-- **Agent / Multi-agent system (ADK)** — in code
-- **MCP Server** — in code
-- **Security features** — in code
-- **Antigravity / deployability / agent skills** — may be discussed in the video depending on final implementation
+## Course Concepts Demonstrated
+
+| Concept | Implementation |
+|---|---|
+| Multi-agent system | 4 chained agents with distinct roles |
+| MCP Server | `src/tools/mcp_server.py` — 8 tools over stdio |
+| Safety & Guardrails | Input validation + output sanitization in `src/security/guardrails.py` |
+
+## Quick Start
+
+```bash
+git clone <your-repo-url>
+cd rd-prioritization-agent
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env        # add your GROQ_API_KEY
+python app.py --goal "what should we run next to improve alignment"
+```
+
+## Verify MCP Tools
+
+```bash
+python test_mcp.py
+```
 
 ## Repository structure
 
