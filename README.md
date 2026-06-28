@@ -15,7 +15,7 @@ This leads to:
 
 This project addresses that problem by building an agent-based workflow that helps prioritize the next experiments in a structured and explainable way.
 
-## Why agents
+## Why Agents
 
 This problem is a good fit for AI agents because it requires more than a single answer:
 - one component must read and organize past experiment records,
@@ -29,7 +29,7 @@ Instead of a simple chatbot, this project uses an agent workflow to turn messy R
 
 This project is submitted to the **Agents for Business** track because it focuses on improving decision-making and productivity in R&D workflows, where time and cost matter.
 
-## What the system does
+## What the System Does
 
 Given:
 - past experiment records,
@@ -44,7 +44,7 @@ the system:
 4. explains trade-offs,
 5. generates a short decision memo.
 
-## Example use case
+## Example Use Case
 
 A materials R&D team is trying to improve particle alignment in an active matter system under limited time and budget. The team has already tried several combinations of control parameters, but results are mixed and notes are incomplete. The agent reviews prior outcomes and recommends the next best experiments to run.
 
@@ -64,7 +64,8 @@ This project uses a small multi-agent design:
 - **Report Agent**  
   Produces a human-readable recommendation memo.
 
-the process flow: User Goal → [Intake Agent] → [Context Agent] → [Prioritization Agent] → [Report Agent] → Decision Memo
+**Process flow:**
+User Goal → [Intake Agent] → [Context Agent] → [Prioritization Agent] → [Report Agent] → Decision Memo
 
 
 ## Course Concepts Demonstrated
@@ -78,7 +79,7 @@ the process flow: User Goal → [Intake Agent] → [Context Agent] → [Prioriti
 ## Quick Start
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/luna026/rd-prioritization-agent.git
 cd rd-prioritization-agent
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -92,7 +93,7 @@ python app.py --goal "what should we run next to improve alignment"
 python test_mcp.py
 ```
 
-## Repository structure
+## Repository Structure
 
 ```text
 rd-prioritization-agent/
@@ -101,6 +102,7 @@ rd-prioritization-agent/
 ├── .env.example
 ├── app.py
 ├── demo.py
+├── notebook.ipynb
 ├── data/
 │   ├── experiments.csv
 │   ├── constraints.json
@@ -116,7 +118,7 @@ rd-prioritization-agent/
 └── docs/
 ```
 
-## Data files
+## Data Files
 
 The starter version uses synthetic sample data:
 - `data/experiments.csv` for prior experiment history,
@@ -133,20 +135,23 @@ This makes the project easy to run locally without private or sensitive data.
    ```bash
    pip install -r requirements.txt
    ```
-4. Add environment variables to `.env` if needed.
+4. Add your `GROQ_API_KEY` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
 5. Run the demo:
    ```bash
    python demo.py
    ```
 
-## Example output
+## Example Output
 
 The expected output is:
 - a ranked list of recommended next experiments,
 - a short explanation of why they were selected,
 - a decision memo for a scientist or R&D manager.
 
-## Security notes
+## Security Notes
 
 This project is designed to avoid unsafe or irrelevant behavior by:
 - restricting the scope of supported tasks,
@@ -159,7 +164,7 @@ This project is designed to avoid unsafe or irrelevant behavior by:
 
 This is an early prototype intended for demonstration and learning. It uses synthetic data and simplified scoring logic. It does not replace human scientific judgment and should be treated as a decision-support tool, not an autonomous lab planner.
 
-## Future work
+## Future Work
 
 Possible extensions:
 - connect to real lab notebooks or experiment databases,
@@ -168,15 +173,16 @@ Possible extensions:
 - improve ranking with learned scoring models,
 - add deployment and monitoring.
 
-## Kaggle submission assets
+## Kaggle Submission Assets
 
 This repository supports the required capstone submission materials:
-- public code repository,
-- README documentation,
-- architecture explanation,
-- video demo,
-- Kaggle writeup.
+- [Public GitHub repository](https://github.com/luna026/rd-prioritization-agent)
+- README documentation
+- Architecture explanation
+- [Video demo](#) ← _replace with actual link_
+- [Kaggle writeup](#) ← _replace with actual link_
 
 ## Author
 
-Built as a capstone project for Kaggle’s **AI Agents: Intensive Vibe Coding Capstone Project**.
+Built as a capstone project for Kaggle's **AI Agents: Intensive Vibe Coding Capstone Project**.  
+GitHub: [luna026](https://github.com/luna026)
