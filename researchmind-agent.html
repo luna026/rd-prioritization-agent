@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResearchMind Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+/* ── Design tokens ── */
+:root,[data-theme="light"]{
+  --color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;
+  --color-surface-offset:#f3f0ec;--color-surface-dynamic:#e6e4df;
+  --color-divider:#dcd9d5;--color-border:#d4d1ca;
+  --color-text:#28251d;--color-text-muted:#7a7974;--color-text-faint:#bab9b4;
+  --color-text-inverse:#f9f8f4;
+  --color-primary:#01696f;--color-primary-hover:#0c4e54;--color-primary-active:#0f3638;
+  --color-primary-highlight:#cedcd8;
+  --color-success:#437a22;--color-success-highlight:#d4dfcc;
+  --color-warning:#964219;--color-warning-highlight:#ddcfc6;
+  --color-error:#a12c7b;--color-error-highlight:#e0ced7;
+  --color-blue:#006494;--color-blue-highlight:#c6d8e4;
+  --color-gold:#d19900;--color-gold-highlight:#e9e0c6;
+  --radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --shadow-sm:0 1px 2px oklch(0.2 0.01 80/0.06);
+  --shadow-md:0 4px 12px oklch(0.2 0.01 80/0.08);
+  --shadow-lg:0 12px 32px oklch(0.2 0.01 80/0.12);
+  --font-display:'Instrument Serif',Georgia,serif;
+  --font-body:'DM Sans','Helvetica Neue',sans-serif;
+  --text-xs:clamp(0.75rem,0.7rem + 0.25vw,0.875rem);
+  --text-sm:clamp(0.875rem,0.8rem + 0.35vw,1rem);
+  --text-base:clamp(1rem,0.95rem + 0.25vw,1.125rem);
+  --text-lg:clamp(1.125rem,1rem + 0.75vw,1.5rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+  --space-12:3rem;--space-16:4rem;
+  --transition:180ms cubic-bezier(0.16,1,0.3,1);
+}
+[data-theme="dark"]{
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-dynamic:#2d2c2a;
+  --color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-text-inverse:#2b2a28;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-active:#1a626b;
+  --color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-highlight:#3a4435;
+  --color-warning:#bb653b;--color-warning-highlight:#564942;
+  --color-error:#d163a7;--color-error-highlight:#4c3d46;
+  --color-blue:#5591c7;--color-blue-highlight:#3a4550;
+  --color-gold:#e8af34;--color-gold-highlight:#4d4332;
+  --shadow-sm:0 1px 2px oklch(0 0 0/0.2);
+  --shadow-md:0 4px 12px oklch(0 0 0/0.3);
+  --shadow-lg:0 12px 32px oklch(0 0 0/0.4);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-dynamic:#2d2c2a;
+  --color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-text-inverse:#2b2a28;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-active:#1a626b;
+  --color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-highlight:#3a4435;
+  --shadow-sm:0 1px 2px oklch(0 0 0/0.2);
+  --shadow-md:0 4px 12px oklch(0 0 0/0.3);
+}}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6}
+img,svg{display:block;max-width:100%}
+input,button,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none}
+a,button,[role="button"],input,textarea,select{transition:color var(--transition),background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition)}
+:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+
+/* ── Layout ── */
+.app-shell{display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr;min-height:100dvh}
+@media(max-width:768px){.app-shell{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}}
+
+/* ── Header ── */
+header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
+  padding:var(--space-4) var(--space-8);border-bottom:1px solid var(--color-divider);
+  background:var(--color-surface);position:sticky;top:0;z-index:100}
+@media(max-width:768px){header{padding:var(--space-3) var(--space-4)}}
+.logo{display:flex;align-items:center;gap:var(--space-3)}
+.logo-icon{width:32px;height:32px;color:var(--color-primary)}
+.logo-text{font-family:var(--font-display);font-size:var(--text-lg);font-weight:400;letter-spacing:-0.01em}
+.logo-text span{color:var(--color-primary)}
+.header-actions{display:flex;align-items:center;gap:var(--space-2)}
+.btn-icon{display:flex;align-items:center;justify-content:center;width:36px;height:36px;
+  border-radius:var(--radius-md);color:var(--color-text-muted)}
+.btn-icon:hover{background:var(--color-surface-offset);color:var(--color-text)}
+
+/* ── Sidebar ── */
+aside{background:var(--color-surface);border-right:1px solid var(--color-divider);
+  padding:var(--space-6) 0;overflow-y:auto;display:flex;flex-direction:column;gap:var(--space-2)}
+@media(max-width:768px){aside{display:none}}
+.nav-section-label{padding:var(--space-2) var(--space-6);font-size:var(--text-xs);
+  font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-faint)}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-6);
+  border-radius:0;font-size:var(--text-sm);color:var(--color-text-muted);cursor:pointer;
+  border-left:2px solid transparent;transition:all var(--transition)}
+.nav-item:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.nav-item.active{background:var(--color-primary-highlight);color:var(--color-primary);
+  border-left-color:var(--color-primary);font-weight:500}
+.nav-item svg{flex-shrink:0}
+.nav-divider{height:1px;background:var(--color-divider);margin:var(--space-2) var(--space-6)}
+
+/* ── Main ── */
+main{overflow-y:auto;display:flex;flex-direction:column;height:calc(100dvh - 65px)}
+@media(max-width:768px){main{height:auto}}
+
+/* ── View panels ── */
+.view{display:none;flex:1;flex-direction:column;padding:var(--space-8);gap:var(--space-8)}
+.view.active{display:flex}
+@media(max-width:768px){.view{padding:var(--space-4);gap:var(--space-6)}}
+
+/* ── Chat view ── */
+#view-chat{padding:0;overflow:hidden}
+.chat-header{padding:var(--space-6) var(--space-8);border-bottom:1px solid var(--color-divider);
+  background:var(--color-surface-2)}
+@media(max-width:768px){.chat-header{padding:var(--space-4)}}
+.chat-title{font-family:var(--font-display);font-size:var(--text-xl);font-weight:400}
+.chat-subtitle{color:var(--color-text-muted);font-size:var(--text-sm);margin-top:var(--space-1)}
+.chat-body{flex:1;overflow-y:auto;padding:var(--space-6) var(--space-8);
+  display:flex;flex-direction:column;gap:var(--space-6)}
+@media(max-width:768px){.chat-body{padding:var(--space-4)}}
+.chat-footer{padding:var(--space-4) var(--space-8);border-top:1px solid var(--color-divider);
+  background:var(--color-surface)}
+@media(max-width:768px){.chat-footer{padding:var(--space-3) var(--space-4)}}
+
+/* Messages */
+.msg{display:flex;gap:var(--space-3);max-width:760px}
+.msg-user{align-self:flex-end;flex-direction:row-reverse}
+.msg-avatar{width:32px;height:32px;border-radius:var(--radius-full);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:600}
+.msg-user .msg-avatar{background:var(--color-primary);color:var(--color-text-inverse)}
+.msg-agent .msg-avatar{background:var(--color-surface-dynamic);color:var(--color-text-muted)}
+.msg-bubble{padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);
+  font-size:var(--text-base);line-height:1.65;max-width:100%}
+.msg-user .msg-bubble{background:var(--color-primary);color:var(--color-text-inverse);
+  border-bottom-right-radius:var(--radius-sm)}
+.msg-agent .msg-bubble{background:var(--color-surface-2);border:1px solid var(--color-border);
+  border-bottom-left-radius:var(--radius-sm);color:var(--color-text)}
+
+/* Typing indicator */
+.typing-dots{display:flex;gap:4px;align-items:center;padding:var(--space-1) 0}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--color-text-faint);
+  animation:bounce 1.4s infinite ease-in-out}
+.typing-dots span:nth-child(2){animation-delay:0.2s}
+.typing-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+/* Chip prompts */
+.prompt-chips{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-2)}
+.chip{padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-full);
+  font-size:var(--text-xs);cursor:pointer;background:var(--color-surface-2);color:var(--color-text-muted);
+  white-space:nowrap;transition:all var(--transition)}
+.chip:hover{background:var(--color-primary-highlight);color:var(--color-primary);border-color:var(--color-primary)}
+
+/* Input bar */
+.input-bar{display:flex;align-items:flex-end;gap:var(--space-2);
+  background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-xl);
+  padding:var(--space-3) var(--space-4);transition:box-shadow var(--transition),border-color var(--transition)}
+.input-bar:focus-within{border-color:var(--color-primary);box-shadow:0 0 0 3px color-mix(in oklch,var(--color-primary) 15%,transparent)}
+.input-bar textarea{flex:1;border:none;background:transparent;resize:none;outline:none;
+  font-size:var(--text-sm);line-height:1.5;max-height:140px;min-height:24px;overflow-y:auto;color:var(--color-text)}
+.input-bar textarea::placeholder{color:var(--color-text-faint)}
+.send-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;
+  border-radius:var(--radius-md);background:var(--color-primary);color:var(--color-text-inverse);
+  flex-shrink:0;transition:background var(--transition)}
+.send-btn:hover{background:var(--color-primary-hover)}
+.send-btn:disabled{background:var(--color-surface-dynamic);color:var(--color-text-faint);cursor:not-allowed}
+
+/* ── Upload view ── */
+.section-title{font-family:var(--font-display);font-size:var(--text-xl);font-weight:400}
+.section-subtitle{color:var(--color-text-muted);font-size:var(--text-sm);margin-top:var(--space-1)}
+.upload-zone{border:2px dashed var(--color-border);border-radius:var(--radius-xl);
+  padding:var(--space-12) var(--space-8);text-align:center;cursor:pointer;
+  transition:all var(--transition);background:var(--color-surface)}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--color-primary);
+  background:var(--color-primary-highlight)}
+.upload-icon{width:48px;height:48px;margin:0 auto var(--space-4);color:var(--color-text-faint)}
+.upload-title{font-size:var(--text-base);font-weight:500;margin-bottom:var(--space-2)}
+.upload-hint{font-size:var(--text-sm);color:var(--color-text-muted)}
+.upload-hint strong{color:var(--color-primary);cursor:pointer}
+.file-list{display:flex;flex-direction:column;gap:var(--space-3)}
+.file-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);
+  background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg)}
+.file-icon{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;
+  justify-content:center;flex-shrink:0}
+.file-icon.pdf{background:var(--color-error-highlight);color:var(--color-error)}
+.file-icon.csv{background:var(--color-success-highlight);color:var(--color-success)}
+.file-icon.txt{background:var(--color-blue-highlight);color:var(--color-blue)}
+.file-icon.json{background:var(--color-gold-highlight);color:var(--color-gold)}
+.file-meta{flex:1;min-width:0}
+.file-name{font-size:var(--text-sm);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-size{font-size:var(--text-xs);color:var(--color-text-muted)}
+.file-status{font-size:var(--text-xs);padding:2px var(--space-2);border-radius:var(--radius-full)}
+.file-status.ready{background:var(--color-success-highlight);color:var(--color-success)}
+.btn-remove{color:var(--color-text-faint);padding:var(--space-1)}
+.btn-remove:hover{color:var(--color-error)}
+
+/* ── Cards & Results ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:var(--space-4)}
+.card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/0.08);
+  border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm);
+  transition:box-shadow var(--transition)}
+.card:hover{box-shadow:var(--shadow-md)}
+.card-tag{display:inline-flex;align-items:center;gap:var(--space-1);font-size:var(--text-xs);
+  font-weight:600;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:var(--space-3);
+  padding:2px var(--space-2);border-radius:var(--radius-full)}
+.card-tag.insight{background:var(--color-primary-highlight);color:var(--color-primary)}
+.card-tag.gap{background:var(--color-warning-highlight);color:var(--color-warning)}
+.card-tag.action{background:var(--color-success-highlight);color:var(--color-success)}
+.card-tag.trend{background:var(--color-blue-highlight);color:var(--color-blue)}
+.card h3{font-size:var(--text-base);font-weight:600;margin-bottom:var(--space-2);line-height:1.35}
+.card p{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6}
+.card-footer{margin-top:var(--space-4);padding-top:var(--space-3);border-top:1px solid var(--color-divider);
+  display:flex;align-items:center;justify-content:space-between}
+.card-confidence{font-size:var(--text-xs);color:var(--color-text-faint)}
+.confidence-bar{display:inline-block;width:60px;height:4px;background:var(--color-surface-dynamic);
+  border-radius:var(--radius-full);vertical-align:middle;margin-left:var(--space-2);overflow:hidden}
+.confidence-fill{height:100%;border-radius:var(--radius-full);background:var(--color-primary)}
+
+/* ── History view ── */
+.history-list{display:flex;flex-direction:column;gap:var(--space-3)}
+.history-item{display:flex;align-items:flex-start;gap:var(--space-4);padding:var(--space-4);
+  background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/0.08);
+  border-radius:var(--radius-lg);cursor:pointer;transition:all var(--transition)}
+.history-item:hover{box-shadow:var(--shadow-sm);border-color:var(--color-primary)}
+.history-icon{width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-primary-highlight);
+  color:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.history-body{flex:1;min-width:0}
+.history-query{font-size:var(--text-sm);font-weight:500;margin-bottom:var(--space-1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-meta{font-size:var(--text-xs);color:var(--color-text-muted)}
+.history-badge{font-size:var(--text-xs);padding:2px var(--space-2);border-radius:var(--radius-full);
+  background:var(--color-surface-offset);color:var(--color-text-muted);white-space:nowrap;flex-shrink:0}
+
+/* ── Settings view ── */
+.settings-section{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/0.08);
+  border-radius:var(--radius-xl);overflow:hidden}
+.settings-row{display:flex;align-items:center;justify-content:space-between;
+  padding:var(--space-4) var(--space-6);gap:var(--space-4)}
+.settings-row+.settings-row{border-top:1px solid var(--color-divider)}
+.settings-label h3{font-size:var(--text-sm);font-weight:500}
+.settings-label p{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px}
+.toggle{width:44px;height:24px;border-radius:var(--radius-full);background:var(--color-surface-dynamic);
+  position:relative;cursor:pointer;transition:background var(--transition);flex-shrink:0;border:none}
+.toggle.on{background:var(--color-primary)}
+.toggle::after{content:'';width:18px;height:18px;border-radius:50%;background:#fff;
+  position:absolute;top:3px;left:3px;transition:transform var(--transition)}
+.toggle.on::after{transform:translateX(20px)}
+.select-input{padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);
+  border-radius:var(--radius-md);background:var(--color-surface-2);font-size:var(--text-sm);
+  color:var(--color-text);min-width:140px}
+
+/* ── Empty state ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:var(--space-16) var(--space-8);color:var(--color-text-muted)}
+.empty-icon{width:56px;height:56px;margin:0 auto var(--space-4);color:var(--color-text-faint)}
+.empty-state h3{font-size:var(--text-lg);font-weight:500;color:var(--color-text);margin-bottom:var(--space-2)}
+.empty-state p{font-size:var(--text-sm);max-width:36ch}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);
+  border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;cursor:pointer;
+  border:none;transition:all var(--transition)}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse)}
+.btn-primary:hover{background:var(--color-primary-hover)}
+.btn-secondary{background:var(--color-surface-offset);color:var(--color-text);
+  border:1px solid var(--color-border)}
+.btn-secondary:hover{background:var(--color-surface-dynamic)}
+
+/* ── Progress bar ── */
+.progress-container{margin-top:var(--space-2)}
+.progress-label{display:flex;justify-content:space-between;font-size:var(--text-xs);
+  color:var(--color-text-muted);margin-bottom:var(--space-1)}
+.progress-bar{height:6px;background:var(--color-surface-dynamic);border-radius:var(--radius-full);overflow:hidden}
+.progress-fill{height:100%;border-radius:var(--radius-full);background:var(--color-primary);
+  transition:width 0.6s cubic-bezier(0.16,1,0.3,1)}
+
+/* ── Mobile nav bar ── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--color-surface);border-top:1px solid var(--color-divider);
+  padding:var(--space-2) 0 calc(var(--space-2) + env(safe-area-inset-bottom))}
+@media(max-width:768px){.mobile-nav{display:flex}}
+.mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:var(--space-2);font-size:10px;color:var(--color-text-muted);cursor:pointer;
+  transition:color var(--transition)}
+.mobile-nav-item.active{color:var(--color-primary)}
+@media(max-width:768px){body{padding-bottom:72px}}
+
+/* ── Skeleton ── */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{background:linear-gradient(90deg,var(--color-surface-offset) 25%,var(--color-surface-dynamic) 50%,var(--color-surface-offset) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:var(--radius-sm)}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <svg class="logo-icon" viewBox="0 0 32 32" fill="none" aria-label="ResearchMind logo">
+        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="16" cy="16" r="6" fill="currentColor" opacity="0.15"/>
+        <path d="M16 8 L16 24M8 16 L24 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="16" cy="10" r="2" fill="currentColor"/>
+        <circle cx="22" cy="16" r="2" fill="currentColor"/>
+        <circle cx="16" cy="22" r="1.5" fill="currentColor" opacity="0.6"/>
+        <circle cx="10" cy="16" r="1.5" fill="currentColor" opacity="0.6"/>
+      </svg>
+      <span class="logo-text">Research<span>Mind</span></span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" aria-label="Notifications">
+        <i data-lucide="bell" width="18" height="18"></i>
+      </button>
+      <button class="btn-icon" data-theme-toggle aria-label="Toggle theme">
+        <i data-lucide="moon" width="18" height="18"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside>
+    <span class="nav-section-label">Workspace</span>
+    <div class="nav-item active" onclick="switchView('chat',this)">
+      <i data-lucide="message-square" width="16" height="16"></i>
+      Ask the Agent
+    </div>
+    <div class="nav-item" onclick="switchView('upload',this)">
+      <i data-lucide="upload-cloud" width="16" height="16"></i>
+      Upload Data
+    </div>
+    <div class="nav-item" onclick="switchView('insights',this)">
+      <i data-lucide="lightbulb" width="16" height="16"></i>
+      Insights
+    </div>
+    <div class="nav-divider"></div>
+    <span class="nav-section-label">History</span>
+    <div class="nav-item" onclick="switchView('history',this)">
+      <i data-lucide="clock" width="16" height="16"></i>
+      Past Sessions
+    </div>
+    <div class="nav-divider"></div>
+    <span class="nav-section-label">Account</span>
+    <div class="nav-item" onclick="switchView('settings',this)">
+      <i data-lucide="settings" width="16" height="16"></i>
+      Settings
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+
+    <!-- ── Chat View ── -->
+    <div id="view-chat" class="view active" style="flex-direction:column;padding:0">
+      <div class="chat-header">
+        <h1 class="chat-title">Ask your R&amp;D Agent</h1>
+        <p class="chat-subtitle">Upload papers, data, or notes — then ask anything about your research.</p>
+      </div>
+      <div class="chat-body" id="chat-messages">
+        <!-- Welcome message -->
+        <div class="msg msg-agent">
+          <div class="msg-avatar">
+            <i data-lucide="cpu" width="16" height="16"></i>
+          </div>
+          <div class="msg-bubble">
+            <strong>Hello! I'm your R&amp;D Intelligence Agent.</strong><br><br>
+            I can help you with:<br>
+            • Summarising research papers or experiment logs<br>
+            • Finding knowledge gaps in your data<br>
+            • Suggesting next experiments or hypotheses<br>
+            • Generating structured decision reports<br><br>
+            Upload a document or just type a question to get started.
+          </div>
+        </div>
+      </div>
+      <div class="chat-footer">
+        <div class="prompt-chips" id="prompt-chips">
+          <button class="chip" onclick="useChip(this)">Summarise uploaded paper</button>
+          <button class="chip" onclick="useChip(this)">Find gaps in my data</button>
+          <button class="chip" onclick="useChip(this)">Suggest next experiments</button>
+          <button class="chip" onclick="useChip(this)">Generate a decision report</button>
+        </div>
+        <div class="input-bar">
+          <textarea id="chat-input" rows="1" placeholder="Ask anything about your research…"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()" aria-label="Send message">
+            <i data-lucide="send" width="16" height="16"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Upload View ── -->
+    <div id="view-upload" class="view">
+      <div>
+        <h1 class="section-title">Upload Research Data</h1>
+        <p class="section-subtitle">Add papers, experiment logs, datasets, or notes. All formats welcome.</p>
+      </div>
+      <div class="upload-zone" id="upload-zone"
+        ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)"
+        onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon"><i data-lucide="upload-cloud" width="48" height="48"></i></div>
+        <p class="upload-title">Drop files here</p>
+        <p class="upload-hint">or <strong>browse to upload</strong></p>
+        <p class="upload-hint" style="margin-top:var(--space-2)">PDF · CSV · TXT · JSON · DOCX supported</p>
+      </div>
+      <input type="file" id="file-input" multiple accept=".pdf,.csv,.txt,.json,.docx" style="display:none" onchange="addFiles(event)">
+
+      <div id="file-list" class="file-list" style="display:none">
+        <h2 style="font-size:var(--text-base);font-weight:600">Uploaded files</h2>
+        <div id="file-items"></div>
+        <div style="margin-top:var(--space-2)">
+          <button class="btn btn-primary" onclick="analyseFiles()">
+            <i data-lucide="zap" width="14" height="14"></i>
+            Analyse with Agent
+          </button>
+        </div>
+      </div>
+
+      <div id="analysis-progress" style="display:none">
+        <div class="progress-container">
+          <div class="progress-label"><span>Analysing documents…</span><span id="progress-pct">0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        </div>
+        <p id="progress-step" style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-2)">Initialising…</p>
+      </div>
+    </div>
+
+    <!-- ── Insights View ── -->
+    <div id="view-insights" class="view">
+      <div>
+        <h1 class="section-title">Insights &amp; Recommendations</h1>
+        <p class="section-subtitle">Auto-generated findings from your uploaded research data.</p>
+      </div>
+      <div class="cards-grid" id="insights-grid">
+        <!-- Insight cards inserted by JS -->
+      </div>
+    </div>
+
+    <!-- ── History View ── -->
+    <div id="view-history" class="view">
+      <div>
+        <h1 class="section-title">Past Sessions</h1>
+        <p class="section-subtitle">Revisit previous analyses and conversations.</p>
+      </div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <!-- ── Settings View ── -->
+    <div id="view-settings" class="view">
+      <div>
+        <h1 class="section-title">Settings</h1>
+        <p class="section-subtitle">Customise how the agent works for you.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--space-6);max-width:560px">
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>Auto-generate insights</h3>
+              <p>Run insight analysis when documents are uploaded</p>
+            </div>
+            <button class="toggle on" onclick="this.classList.toggle('on')" aria-label="Toggle auto insights"></button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>Citation references</h3>
+              <p>Include source citations in agent responses</p>
+            </div>
+            <button class="toggle on" onclick="this.classList.toggle('on')" aria-label="Toggle citations"></button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>Save history</h3>
+              <p>Keep a log of past questions and answers</p>
+            </div>
+            <button class="toggle on" onclick="this.classList.toggle('on')" aria-label="Toggle history"></button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>Analysis depth</h3>
+              <p>How thorough the agent's responses are</p>
+            </div>
+            <select class="select-input">
+              <option>Quick overview</option>
+              <option selected>Balanced</option>
+              <option>Deep analysis</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <h3>Output language</h3>
+              <p>Language for agent responses</p>
+            </div>
+            <select class="select-input">
+              <option selected>English</option>
+              <option>German</option>
+              <option>French</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-secondary" style="width:fit-content">
+          <i data-lucide="trash-2" width="14" height="14"></i>
+          Clear all data &amp; history
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Mobile nav -->
+<nav class="mobile-nav" aria-label="Mobile navigation">
+  <div class="mobile-nav-item active" onclick="switchView('chat',this,true)">
+    <i data-lucide="message-square" width="20" height="20"></i>
+    Ask
+  </div>
+  <div class="mobile-nav-item" onclick="switchView('upload',this,true)">
+    <i data-lucide="upload-cloud" width="20" height="20"></i>
+    Upload
+  </div>
+  <div class="mobile-nav-item" onclick="switchView('insights',this,true)">
+    <i data-lucide="lightbulb" width="20" height="20"></i>
+    Insights
+  </div>
+  <div class="mobile-nav-item" onclick="switchView('history',this,true)">
+    <i data-lucide="clock" width="20" height="20"></i>
+    History
+  </div>
+  <div class="mobile-nav-item" onclick="switchView('settings',this,true)">
+    <i data-lucide="settings" width="20" height="20"></i>
+    Settings
+  </div>
+</nav>
+
+<script>
+// Theme toggle
+(function(){
+  const r=document.documentElement;
+  let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  r.setAttribute('data-theme',d);
+  const t=document.querySelector('[data-theme-toggle]');
+  if(t){
+    t.innerHTML=d==='dark'
+      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    t.addEventListener('click',()=>{
+      d=d==='dark'?'light':'dark';
+      r.setAttribute('data-theme',d);
+      t.innerHTML=d==='dark'
+        ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+        :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    });
+  }
+})();
+
+// Navigation
+function switchView(id, el, isMobile=false){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if(isMobile){
+    document.querySelectorAll('.mobile-nav-item').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+    // sync sidebar
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      n.classList.toggle('active', n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"));
+    });
+  } else {
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+    // sync mobile nav
+    document.querySelectorAll('.mobile-nav-item').forEach(n=>{
+      n.classList.toggle('active', n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"));
+    });
+  }
+  if(id==='insights') renderInsights();
+  if(id==='history') renderHistory();
+}
+
+// Auto-resize textarea
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,140)+'px';
+}
+
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+}
+
+function useChip(btn){
+  document.getElementById('chat-input').value=btn.textContent;
+  autoResize(document.getElementById('chat-input'));
+  sendMessage();
+}
+
+// Chat logic
+const agentResponses = {
+  default: [
+    "I've analysed your query. Based on the research context, here's what I found:
+
+**Key finding:** The data suggests a clear correlation between the variables you mentioned. This aligns with recent work in active matter systems where self-propulsion introduces non-equilibrium effects.
+
+**Suggested next step:** Consider running a parameter sweep over the Pe number range 0.1–10 to confirm the regime boundaries.",
+    "Great question. Looking at this from a scientific decision perspective:
+
+**Summary:** The current evidence supports the hypothesis with moderate confidence (~72%). The main uncertainty is in the boundary conditions.
+
+**Recommendation:** I'd suggest three experiments: (1) a control run at equilibrium, (2) a perturbed run, and (3) a cross-validation with a symbolic regression model to extract the underlying scaling law.",
+    "I've processed your question against the available context.
+
+**What the literature says:** Similar systems have been studied by Ramaswamy (2010) and Vicsek (1995). The key insight is that collective behaviour emerges at a critical density threshold.
+
+**Gap identified:** No studies so far have combined RL-based policy learning with these self-organised systems. This could be a strong novelty angle for your paper.",
+    "Here's a structured analysis:
+
+**Problem statement:** Well-defined. Your framing aligns with Agents for Business/Science use cases.
+
+**Risk factors:** (1) Data quality, (2) Overfitting in low-sample regime, (3) Interpretability of the learned policy.
+
+**Go / No-Go:** Recommend proceeding. Confidence: High."
+  ]
+};
+
+let responseIndex = 0;
+let isTyping = false;
+const sessionHistory = [
+  {q:"What are the key trends in active matter research?", date:"Today, 14:32", tags:"3 insights"},
+  {q:"Summarise the uploaded experiment log", date:"Yesterday, 09:15", tags:"2 files"},
+  {q:"Suggest hypotheses for anomalous diffusion", date:"Jun 25, 11:40", tags:"5 suggestions"},
+];
+
+function sendMessage(){
+  if(isTyping) return;
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text) return;
+  appendMessage(text,'user');
+  input.value='';
+  input.style.height='auto';
+  document.getElementById('prompt-chips').style.display='none';
+  showTyping();
+  sessionHistory.unshift({q:text.slice(0,60)+(text.length>60?'…':''), date:'Just now', tags:'Processing…'});
+  setTimeout(()=>{
+    removeTyping();
+    const resp=agentResponses.default[responseIndex%agentResponses.default.length];
+    responseIndex++;
+    appendMessage(resp,'agent');
+  }, 1800+Math.random()*800);
+}
+
+function appendMessage(text,role){
+  const body=document.getElementById('chat-messages');
+  const div=document.createElement('div');
+  div.className=`msg msg-${role}`;
+  const initials=role==='user'?'You':'<i data-lucide="cpu" width="14" height="14"></i>';
+  const formatted=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/
+/g,'<br>');
+  div.innerHTML=`<div class="msg-avatar">${initials}</div><div class="msg-bubble">${formatted}</div>`;
+  body.appendChild(div);
+  lucide.createIcons({nodes:[div]});
+  body.scrollTop=body.scrollHeight;
+}
+
+function showTyping(){
+  isTyping=true;
+  const body=document.getElementById('chat-messages');
+  const div=document.createElement('div');
+  div.className='msg msg-agent';
+  div.id='typing-indicator';
+  div.innerHTML='<div class="msg-avatar"><i data-lucide="cpu" width="14" height="14"></i></div><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+  body.appendChild(div);
+  lucide.createIcons({nodes:[div]});
+  body.scrollTop=body.scrollHeight;
+}
+
+function removeTyping(){
+  isTyping=false;
+  const el=document.getElementById('typing-indicator');
+  if(el) el.remove();
+}
+
+// File upload
+const uploadedFiles=[];
+function dragOver(e){e.preventDefault();document.getElementById('upload-zone').classList.add('drag-over')}
+function dragLeave(){document.getElementById('upload-zone').classList.remove('drag-over')}
+function dropFile(e){
+  e.preventDefault();
+  dragLeave();
+  addFilesFromList(e.dataTransfer.files);
+}
+function addFiles(e){ addFilesFromList(e.target.files); }
+function addFilesFromList(files){
+  for(const f of files){
+    uploadedFiles.push(f);
+  }
+  renderFileList();
+}
+function renderFileList(){
+  if(!uploadedFiles.length) return;
+  document.getElementById('file-list').style.display='flex';
+  const container=document.getElementById('file-items');
+  container.innerHTML='';
+  uploadedFiles.forEach((f,i)=>{
+    const ext=f.name.split('.').pop().toLowerCase();
+    const iconClass=ext==='pdf'?'pdf':ext==='csv'?'csv':ext==='json'?'json':'txt';
+    const size=(f.size/1024).toFixed(1)+'KB';
+    const div=document.createElement('div');
+    div.className='file-item';
+    div.innerHTML=`
+      <div class="file-icon ${iconClass}"><i data-lucide="file-text" width="16" height="16"></i></div>
+      <div class="file-meta">
+        <div class="file-name">${f.name}</div>
+        <div class="file-size">${size}</div>
+      </div>
+      <span class="file-status ready">Ready</span>
+      <button class="btn-remove" onclick="removeFile(${i})" aria-label="Remove file">
+        <i data-lucide="x" width="14" height="14"></i>
+      </button>`;
+    container.appendChild(div);
+  });
+  lucide.createIcons({nodes:[container]});
+}
+function removeFile(i){
+  uploadedFiles.splice(i,1);
+  if(!uploadedFiles.length) document.getElementById('file-list').style.display='none';
+  else renderFileList();
+}
+function analyseFiles(){
+  if(!uploadedFiles.length) return;
+  const prog=document.getElementById('analysis-progress');
+  prog.style.display='block';
+  const steps=['Extracting text…','Chunking documents…','Building knowledge graph…','Running analysis…','Generating insights…'];
+  let pct=0; let step=0;
+  const fill=document.getElementById('progress-fill');
+  const pctEl=document.getElementById('progress-pct');
+  const stepEl=document.getElementById('progress-step');
+  const iv=setInterval(()=>{
+    pct+=Math.random()*22;
+    if(pct>=100){pct=100;clearInterval(iv);
+      fill.style.width='100%';pctEl.textContent='100%';
+      stepEl.textContent='Done! Switch to Insights to see results.';
+      renderInsights();
+    } else {
+      fill.style.width=pct+'%';
+      pctEl.textContent=Math.round(pct)+'%';
+      if(step<steps.length) stepEl.textContent=steps[step++];
+    }
+  },600);
+}
+
+// Insights
+const insightData=[
+  {tag:'insight',label:'Key Finding',title:'Non-equilibrium steady states dominate at high Péclet number',body:'Across 3 uploaded documents, agents consistently achieve higher reward in regimes where Pe > 5, suggesting self-propulsion outpaces diffusion.',confidence:88},
+  {tag:'gap',label:'Research Gap',title:'No cross-validation with symbolic regression models',body:'Current literature lacks studies that combine RL-learned policies with PySR-derived symbolic laws. High novelty potential for publication.',confidence:91},
+  {tag:'action',label:'Next Experiment',title:'Run parameter sweep: Pe ∈ [0.1, 10], N ∈ [50, 500]',body:'Recommended by the agent to resolve the boundary condition uncertainty identified in your experiment logs.',confidence:76},
+  {tag:'trend',label:'Trend',title:'Interpretability requirements rising in ML-physics papers',body:'Recent high-impact papers in Nature Physics and PRL increasingly require explainable models alongside neural baselines.',confidence:82},
+  {tag:'insight',label:'Key Finding',title:'Reward shaping significantly accelerates convergence',body:'Adding potential-based shaping reduces training episodes by ~40% in dense-reward environments, consistent with Ng et al. (1999).',confidence:79},
+  {tag:'action',label:'Next Step',title:'Combine reinforcement learning with order-parameter tracking',body:'The agent recommends adding a live order-parameter monitor during training to detect phase transitions in real time.',confidence:85},
+];
+
+function renderInsights(){
+  const grid=document.getElementById('insights-grid');
+  if(grid.children.length) return;
+  insightData.forEach(d=>{
+    const card=document.createElement('div');
+    card.className='card';
+    card.innerHTML=`
+      <span class="card-tag ${d.tag}">${d.label}</span>
+      <h3>${d.title}</h3>
+      <p>${d.body}</p>
+      <div class="card-footer">
+        <span class="card-confidence">
+          Confidence
+          <span class="confidence-bar"><span class="confidence-fill" style="width:${d.confidence}%"></span></span>
+          ${d.confidence}%
+        </span>
+        <button class="btn btn-secondary" style="padding:var(--space-1) var(--space-3);font-size:var(--text-xs)" onclick="askAbout(this)">
+          Ask agent
+        </button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function askAbout(btn){
+  const title=btn.closest('.card').querySelector('h3').textContent;
+  switchView('chat',document.querySelector('.nav-item'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('.nav-item').classList.add('active');
+  setTimeout(()=>{
+    const input=document.getElementById('chat-input');
+    input.value='Tell me more about: '+title;
+    autoResize(input);
+  },100);
+}
+
+// History
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  if(list.children.length && sessionHistory.length===list.children.length) return;
+  list.innerHTML='';
+  sessionHistory.forEach(h=>{
+    const div=document.createElement('div');
+    div.className='history-item';
+    div.innerHTML=`
+      <div class="history-icon"><i data-lucide="message-circle" width="16" height="16"></i></div>
+      <div class="history-body">
+        <div class="history-query">${h.q}</div>
+        <div class="history-meta">${h.date}</div>
+      </div>
+      <span class="history-badge">${h.tags}</span>`;
+    list.appendChild(div);
+  });
+  lucide.createIcons({nodes:[list]});
+}
+
+// Init icons
+lucide.createIcons();
+</script>
+</body>
+</html>
